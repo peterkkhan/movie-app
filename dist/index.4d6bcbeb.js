@@ -757,17 +757,20 @@ var _headline = require("../components/Headline");
 var _headlineDefault = parcelHelpers.interopDefault(_headline);
 var _search = require("../components/Search");
 var _searchDefault = parcelHelpers.interopDefault(_search);
+var _movieList = require("../components/MovieList");
+var _movieListDefault = parcelHelpers.interopDefault(_movieList);
 class Home extends (0, _heropy.Component) {
     render() {
         const headline = new (0, _headlineDefault.default)().el;
         const search = new (0, _searchDefault.default)().el;
+        const movieList = new (0, _movieListDefault.default)().el;
         this.el.classList.add('container');
-        this.el.append(headline, search);
+        this.el.append(headline, search, movieList);
     }
 }
 exports.default = Home;
 
-},{"../core/heropy":"57bZf","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../components/Headline":"gaVgo","../components/Search":"jqPPz"}],"gaVgo":[function(require,module,exports,__globalThis) {
+},{"../core/heropy":"57bZf","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../components/Headline":"gaVgo","../components/Search":"jqPPz","../components/MovieList":"8UDl3"}],"gaVgo":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _heropy = require("../core/heropy");
@@ -824,19 +827,84 @@ exports.default = Search;
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "searchMovies", ()=>searchMovies);
-var _heropy = require("../core/heropy");
-const store = new (0, _heropy.Store)({
+var _heropyJs = require("../core/heropy.js");
+const store = new (0, _heropyJs.Store)({
     searchText: '',
     page: 1,
     movies: []
 });
 exports.default = store;
 const searchMovies = async (page)=>{
+    if (page === 1) {
+        store.state.page = 1;
+        store.state.movies = [];
+    }
     const res = await fetch(`https://omdbapi.com?apikey=7035c60c&s=${store.state.searchText}&page=${page}`);
-    const json = await res.json();
-    console.log(json);
+    const { Search } = await res.json();
+    store.state.movies = [
+        ...store.state.movies,
+        ...Search
+    ];
 };
 
-},{"../core/heropy":"57bZf","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["1Fqy1","gLLPy"], "gLLPy", "parcelRequire94c2")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../core/heropy.js":"57bZf"}],"8UDl3":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _heropyJs = require("../core/heropy.js");
+var _movieJs = require("../store/movie.js");
+var _movieJsDefault = parcelHelpers.interopDefault(_movieJs);
+var _movieItemJs = require("./MovieItem.js");
+var _movieItemJsDefault = parcelHelpers.interopDefault(_movieItemJs);
+class MovieList extends (0, _heropyJs.Component) {
+    constructor(){
+        super();
+        (0, _movieJsDefault.default).subscribe('movies', ()=>{
+            this.render();
+        });
+    }
+    render() {
+        this.el.classList.add('movie-list');
+        this.el.innerHTML = /* html */ `
+      <div class="movies"></div>
+    `;
+        const moviesEl = this.el.querySelector('.movies');
+        moviesEl.append(...(0, _movieJsDefault.default).state.movies.map((movie)=>new (0, _movieItemJsDefault.default)({
+                movie
+            }).el));
+    }
+}
+exports.default = MovieList;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../core/heropy.js":"57bZf","../store/movie.js":"kq1bo","./MovieItem.js":"fAzE8"}],"fAzE8":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _heropyJs = require("../core/heropy.js");
+class MovieItem extends (0, _heropyJs.Component) {
+    constructor(props){
+        super({
+            props,
+            tagName: 'a'
+        });
+    }
+    render() {
+        const { movie } = this.props;
+        this.el.setAttribute('href', `#/movie?id=${movie.imdbID}`);
+        this.el.classList.add('movie');
+        this.el.style.backgroundImage = `url(${movie.Poster})`;
+        this.el.innerHTML = /* html */ `
+      <div class="info">
+        <div class="year">
+          ${movie.Year}
+        </div>
+        <div class="title">
+          ${movie.Title}
+        </div>
+      </div>
+    `;
+    }
+}
+exports.default = MovieItem;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../core/heropy.js":"57bZf"}]},["1Fqy1","gLLPy"], "gLLPy", "parcelRequire94c2")
 
 //# sourceMappingURL=index.4d6bcbeb.js.map
